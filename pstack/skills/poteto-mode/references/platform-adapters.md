@@ -14,11 +14,11 @@ reduced behavior.
 
 | Intent | Cursor | Codex | Claude Code | Agent Plugins 1.0 floor |
 | --- | --- | --- | --- | --- |
-| Invoke a shared skill | Slash skill such as `/how` | Mention the installed skill, commonly `$how`, or use the client skill picker | Namespaced slash skill such as `/pstack:how` | Client discovers `skills/<name>/SKILL.md`; invocation UX is not standardized |
+| Invoke a shared skill | Slash skill such as `/how` | Type `$` and select the installed skill, such as `$pstack:how` when Codex shows the plugin namespace, or use the client skill picker | Namespaced slash skill such as `/pstack:how` | Client discovers `skills/<name>/SKILL.md`; invocation UX is not standardized |
 | Track a multi-step plan | Cursor todo list | `update_plan` when available; otherwise keep a concise checklist | Todo tool when available; otherwise keep a concise checklist | No standard primitive |
 | Spawn a subagent | `Task` | `spawn_agent` or the active Codex subagent facility | `Agent`; `Task` remains an accepted alias | No standard primitive; run sequentially |
 | Run several subagents | One call containing parallel `Task` launches | Issue independent `spawn_agent` calls before waiting | Issue independent `Agent` calls before waiting | No standard primitive; run sequentially and disclose the downgrade |
-| Use a custom agent | `subagent_type` from `agents/` | Spawn a general worker and tell it to read the matching portable skill first | Load the native agent wrapper from `agents/`, or tell a general worker to read the matching portable skill | Custom agents are unsupported; use the portable skill |
+| Use a custom agent | `subagent_type` from `agents/` | Spawn a general worker and tell it to read the plugin's `agents/<name>.md` file in full first | Load the native agent from `agents/` | Custom agents are unsupported; a general worker reads `agents/<name>.md` in full first |
 | Run in the background | `run_in_background: true` | Spawned subagents already run independently; keep working before `wait_agent` | Use the client background-agent option when available | Unsupported |
 | Ask a structured question | `AskQuestion` | `request_user_input` when exposed; otherwise ask one concise plain-text question | `AskUserQuestion` | Ask in plain text |
 | Select a model | Use a slug confirmed by Cursor | Use a model and reasoning effort confirmed by the active Codex host | Use a model confirmed by Claude Code | Model selection is not standardized; inherit the parent |
@@ -44,12 +44,11 @@ local convention. Keep every generated skill self-contained under one root.
 
 ## Portable custom-agent behavior
 
-The portable [poteto-agent skill](../../poteto-agent/SKILL.md) and
-[comment-sicko skill](../../comment-sicko/SKILL.md) are the sources of truth.
-Cursor and Claude Code can load the thin wrappers under `agents/`. Codex does
-not depend on those wrappers. Resolve the installed skill path, give that path
-to a general subagent, and tell the subagent to read it in full before doing the
-delegated task.
+The definitions under [`agents/`](../../../agents/) (`poteto-agent.md` and
+`comment-sicko.md`) are the sources of truth. Cursor and Claude Code load them
+natively. Codex does not load `agents/`: resolve the installed plugin's
+`agents/<name>.md` path, give that path to a general subagent, and tell the
+subagent to read it in full before doing the delegated task.
 
 `generalPurpose`, `readonly`, `environment`, `cloud_base_branch`, and
 `run_in_background` are client options, not portable arguments. Preserve the
@@ -58,13 +57,11 @@ client cannot provide the requested isolation, do not claim that it did.
 
 ## Configuration and models
 
-The cross-client model override is `.pstack/models.md` at the target
-repository root. It uses the role lines emitted by `setup-pstack`. Every skill
-that selects a model reads this file before using its inline default.
-
-On Cursor, `~/.cursor/rules/pstack-models.mdc` remains a legacy fallback for
-existing installations. The repository-local `.pstack/models.md` takes
-precedence when both exist. Codex and Claude Code do not read the Cursor rule.
+On Cursor, `setup-pstack` writes `~/.cursor/rules/pstack-models.mdc` exactly as
+upstream describes. On Codex and Claude Code, which do not read Cursor rules,
+`setup-pstack` writes `.pstack/models.md` at the target repository root instead,
+with the same role lines and the same shape minus the Cursor rule frontmatter.
+Wherever a skill reads the Cursor rule, read the file for the active client.
 
 Inline model slugs in upstream skills are Cursor defaults. On another client,
 use one only when the active host confirms that exact slug. Otherwise omit the

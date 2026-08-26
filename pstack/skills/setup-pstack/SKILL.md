@@ -1,102 +1,67 @@
 ---
 name: setup-pstack
-description: Configure which models pstack uses per role. Detects models supported by the active client and writes a portable project override. Use for /setup-pstack, "configure pstack models", or changing pstack's model choices.
+description: Configure which models pstack uses per role. Detects your available models and writes an always-applied rule that overrides the skill defaults. Use for /setup-pstack, "configure pstack models", or changing pstack's model choices.
 ---
 
 # Setup pstack
 
-Before following instructions that name client-specific tools, models, or paths,
-use the matching entry in the [platform
-adapters](../poteto-mode/references/platform-adapters.md). Preserve the
-workflow's intent while using the active client's equivalent.
+On a client other than Cursor, resolve any client-specific tool, model, or path this skill names through the [platform adapters](../poteto-mode/references/platform-adapters.md) before following it.
 
-Write `.pstack/models.md` at the target repository root. It sets pstack's
-model per role without coupling the repository to one client. The skills read
-it and fall back to client-resolved inline defaults when a line is absent, so
-this is an override layer, not a requirement.
+Write `~/.cursor/rules/pstack-models.mdc`, an always-applied rule that sets pstack's model per role. The skills read it and fall back to their inline defaults when a line is absent, so this is an override layer, not a requirement.
 
 ## Steps
 
 ### 1. Detect available models
 
-Use the active client's model or subagent facility to enumerate model names
-that are valid in this session. Never infer that a slug supported by another
-client is available. If the client exposes no dependable model list, use
-`inherit-parent` instead of inventing a slug. The aliases `inherit-parent` and
-`auto` are always valid. Both mean to omit the explicit model argument.
+Enumerate the model slugs you can pass to a `Task` subagent in this session; that is the dependable source. If Cursor also exposes a models API or CLI that lists the user's entitled models, prefer it for completeness. If you cannot detect any, ask the user to paste the slugs they have access to. Never write a real slug you have not confirmed is available. The aliases `inherit-parent` and `auto` are always valid even though they are not detected slugs.
 
 ### 2. Load current state
 
-If `.pstack/models.md` exists, read it and treat its values as the current
-choices. On Cursor only, an existing
-`~/.cursor/rules/pstack-models.mdc` is a migration source when the portable file
-does not exist. Keep a migrated real slug only if Cursor confirms it is still
-available. A client-confirmed inline default may seed its role. Otherwise start
-from the safe template in step 5.
+The default role-to-model mapping is the rule shape shown in step 5 below. If `~/.cursor/rules/pstack-models.mdc` already exists, read it and treat its values as the current choices. Otherwise start from those defaults.
 
 ### 3. Map and confirm
 
-Show every role with its current model. Mark each real name not in the detected
-set as needing a choice. Ask whether to accept the mapping or change specific
-roles, using the structured-question mechanism from the adapter when available.
-Offer only detected models plus `inherit-parent` and `auto`.
-
-For panel roles such as how critics, arena runners, architect runners, and
-interrogate reviewers, one subagent runs per list entry. Alias entries still
-count, so the list length sets the fan-out. `arena cross-judge pool` is also a
-list, but Arena chooses one entry whose model family differs from the parent's
-when possible. `swarm workers` is the default for every worker unless a race or
-comparison assigns a different confirmed model per arm.
+Show every role with its current model, marking any real slug not in the detected set as needing a choice. Ask whether to accept as-is or change specific roles, offering the detected models plus `inherit-parent` and `auto` (both mean: this role runs on the parent chat model, which is how Auto users stay on Auto) as the options. Prefer AskQuestion over free text. For panel roles (how critics, arena runners, architect runners, interrogate reviewers) the value is a list, and one subagent runs per entry, alias entries included, so the list length sets the count. `arena cross-judge pool` is also a list, but Arena selects one value from it whose model family differs from the parent's when possible. `swarm workers` is the default model for every worker unless a race or comparison assigns another model per arm.
 
 ### 4. Validate
 
-Every real model name written must be in the detected set. `inherit-parent` and
-`auto` always pass. If a chosen real model is unavailable, stop and ask again.
-A configuration pointing at an unsupported model breaks every delegation that
-reads it.
+Every real slug written must be in the detected set; `inherit-parent` and `auto` always pass. If a chosen real slug is not available, stop and ask again. A rule pointing at a model the user cannot use breaks every delegation that reads it.
 
-### 5. Write the configuration
+### 5. Write the rule
 
-Write `.pstack/models.md` with one line per role, using the labels below.
-Overwrite the whole file so reruns stay idempotent. Replace aliases only with
-models confirmed for the active client.
+Write `~/.cursor/rules/pstack-models.mdc` with `alwaysApply: true` and one line per role, using the same labels poteto-mode uses. Overwrite the whole file so re-runs stay idempotent. Shape:
 
 ```
-# pstack model configuration
-
-One role per line. Delete a line to use the skill default. `inherit-parent` and
-`auto` omit the explicit model argument. Repeated aliases in a panel list keep
-the requested fan-out.
-
-feature, refactoring: inherit-parent
-bug-fix: inherit-parent
-perf-issue: inherit-parent
-hillclimb: inherit-parent
-judgment and prose: inherit-parent
-hardest tasks: inherit-parent
-how explorer: inherit-parent
-how explainer: inherit-parent
-how critics: inherit-parent, inherit-parent, inherit-parent, inherit-parent
-why investigators: inherit-parent
-why synthesizer: inherit-parent
-reflect tooling: inherit-parent
-reflect judgment, divergent, synthesizer: inherit-parent
-arena runners: inherit-parent, inherit-parent, inherit-parent, inherit-parent
-arena cross-judge pool: inherit-parent, inherit-parent, inherit-parent, inherit-parent
-swarm workers: inherit-parent
-architect runners: inherit-parent, inherit-parent, inherit-parent, inherit-parent
-interrogate reviewers: inherit-parent, inherit-parent, inherit-parent, inherit-parent
+---
+description: pstack per-role model choices (overrides skill defaults)
+alwaysApply: true
+---
+# pstack model configuration. One line per role. Delete a line to fall back to the skill default.
+# `inherit-parent` or `auto` as a value: the role runs on the parent chat model (omit Task `model`). Alias entries in a panel list still count toward its fan-out.
+feature, refactoring: grok-4.6-fast-xhigh
+bug-fix: gpt-5.6-sol-max
+perf-issue: gpt-5.6-sol-max
+hillclimb: gpt-5.6-sol-max
+judgment and prose: claude-fable-5-thinking-max
+hardest tasks: claude-fable-5-thinking-max
+how explorer: grok-4.6-fast-xhigh
+how explainer: claude-fable-5-thinking-max
+how critics: claude-fable-5-thinking-max, gpt-5.6-sol-max, grok-4.6-fast-xhigh, claude-opus-5-thinking-xhigh
+why investigators: grok-4.6-fast-xhigh
+why synthesizer: claude-fable-5-thinking-max
+reflect tooling: gpt-5.6-sol-max
+reflect judgment, divergent, synthesizer: claude-fable-5-thinking-max
+arena runners: claude-fable-5-thinking-max, gpt-5.6-sol-max, grok-4.6-fast-xhigh, claude-opus-5-thinking-xhigh
+arena cross-judge pool: claude-fable-5-thinking-max, gpt-5.6-sol-max, grok-4.6-fast-xhigh, claude-opus-5-thinking-xhigh
+swarm workers: grok-4.6-fast-xhigh
+architect runners: claude-fable-5-thinking-max, gpt-5.6-sol-max, grok-4.6-fast-xhigh, claude-opus-5-thinking-xhigh
+interrogate reviewers: claude-fable-5-thinking-max, gpt-5.6-sol-max, grok-4.6-fast-xhigh, claude-opus-5-thinking-xhigh
 ```
 
 ### 6. Confirm
 
-Tell the user that `.pstack/models.md` was written and applies to current and
-future pstack runs in this repository. Rerunning this skill updates it.
+Tell the user the rule was written and that it applies to new sessions. Re-running this skill updates it.
 
 ### 7. Offer a verification skill (optional)
 
-Check whether the project has a way to drive the real app for proof, such as a
-`verify-*` skill or an existing harness. If not, offer once: "Want a
-project-local verification skill so agents can drive the app the way a user
-does and prove changes work?" On yes, invoke `create-verification-skill` using
-the active client's skill syntax. On no, move on without pushing.
+Check whether the project has a way to drive the real app for proof (a `verify-*` skill, or an existing harness). If not, offer once: "want a project-local verification skill, so agents can drive the app the way a user does and prove changes work? I can generate one with /create-verification-skill." On yes, invoke `/create-verification-skill` (resolves wherever pstack is installed — workspace, user, or plugin). On no, move on without pushing.

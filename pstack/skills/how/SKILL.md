@@ -5,10 +5,7 @@ description: "Use for \"how does X work\", code walkthroughs before changing som
 
 # How
 
-Before following instructions that name client-specific tools, models, or paths,
-use the matching entry in the [platform
-adapters](../poteto-mode/references/platform-adapters.md). Preserve the
-workflow's intent while using the active client's equivalent.
+On a client other than Cursor, resolve any client-specific tool, model, or path this skill names through the [platform adapters](../poteto-mode/references/platform-adapters.md) before following it.
 
 Explore the codebase to answer "how does X work?" questions. Produce clear architectural explanations at the level of a senior engineer onboarding onto a subsystem. Enough to build a working mental model, not annotated source code.
 

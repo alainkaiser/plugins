@@ -10,11 +10,11 @@ client discovers and runs those skills. They do not create independent ports.
 | Package identity | `.cursor-plugin/plugin.json` | `.codex-plugin/plugin.json` | `.claude-plugin/plugin.json` | Root `plugin.json` |
 | Shared skills | Native | Native | Native | `skills/<name>/SKILL.md` |
 | Native `agents/` | Supported | Not loaded | Supported | Not standardized |
-| Portable custom-agent behavior | Native wrapper reads the shared skill | General subagent reads the shared skill | Native wrapper or general subagent reads the shared skill | Run the shared skill sequentially |
+| Portable custom-agent behavior | Native `agents/` definitions | General subagent reads `agents/<name>.md` in full first | Native `agents/` definitions | General subagent reads `agents/<name>.md` in full first |
 | Structured questions | `AskQuestion` | `request_user_input` when exposed, otherwise plain text | `AskUserQuestion` | Plain text |
 | Parallel subagents | `Task` | Codex subagent facility | `Agent` | Not standardized; run sequentially |
 | Model selection | Cursor-confirmed slug | Host-confirmed model and reasoning effort | Claude-confirmed model | Inherit parent |
-| Project model configuration | `.pstack/models.md`; legacy Cursor rule fallback | `.pstack/models.md` | `.pstack/models.md` | Not standardized |
+| Project model configuration | `~/.cursor/rules/pstack-models.mdc` (upstream) | `.pstack/models.md` at the repository root | `.pstack/models.md` at the repository root | Not standardized |
 | Transcript access | Session path or workspace-scoped Cursor transcript | Current task or thread history exposed by the host | Current or resumed session history | Conversation context or user export |
 | Repeat or wake | `/loop` | Monitor, scheduled task, or heartbeat when exposed | `/loop` or scheduled-task tools | Not standardized |
 | Hooks shipped by pstack | None | None | None | Not standardized |
@@ -44,9 +44,10 @@ plugins/
 ```
 
 Only `pstack/skills/` is registered as the shared skill tree. The two files in
-`pstack/agents/` are thin Cursor and Claude Code wrappers around portable
-skills. Benny has private automation skills under its own directory, but no
-portable or non-Cursor manifest declares them.
+`pstack/agents/` are the upstream custom-agent definitions; Cursor and Claude
+Code load them natively, and Codex has a general subagent read them via the
+platform adapter. Benny has private automation skills under its own directory,
+but no portable or non-Cursor manifest declares them.
 
 The root `plugin.json` follows the [Agent Plugins 1.0
 specification](https://agent-plugins.org/specification). That specification is
@@ -174,9 +175,9 @@ agrees.
 
 The smallest useful upstream PR to `cursor/plugins/pstack` is the portability
 core: the strict root Agent Plugins manifest, thin native package manifests,
-one adapter reference, portable versions of custom-agent behavior, the
-repository-local model configuration, focused docs, and the dependency-free
-validator. Benny remains a named Cursor extension in that PR.
+one adapter reference, the one-line adapter pointer in the skills that name
+client primitives, focused docs, and the dependency-free validator. Benny
+remains a named Cursor extension in that PR.
 
 Repository-level Codex and Claude marketplace catalogs, publication workflow,
 release synchronization, and any future client-native hooks or command

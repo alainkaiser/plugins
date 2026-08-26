@@ -189,14 +189,9 @@ for (const directory of skillDirectories) {
   }
 }
 
-const agentContracts = [
-  ["comment-sicko", "../skills/comment-sicko/SKILL.md"],
-  ["poteto-agent", "../skills/poteto-agent/SKILL.md"],
-];
-for (const [name, source] of agentContracts) {
-  const wrapper = readText(resolve(pstackRoot, `agents/${name}.md`));
-  assert(wrapper.includes(source), `agents/${name}.md must delegate to ${source}`);
-  assert(existsSync(resolve(skillsRoot, name, "SKILL.md")), `portable ${name} skill is missing`);
+for (const name of ["comment-sicko", "poteto-agent"]) {
+  assert(existsSync(resolve(pstackRoot, `agents/${name}.md`)), `agents/${name}.md is missing`);
+  assert(adapterText.includes(`${name}.md`), `platform adapter must name agents/${name}.md as a source of truth`);
 }
 
 for (const [client, manifest] of Object.entries({ portable: manifests.portable, codex: manifests.codex, claude: manifests.claude })) {

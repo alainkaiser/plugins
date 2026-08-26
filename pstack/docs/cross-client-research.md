@@ -2,7 +2,9 @@
 
 Retrieved 2026-08-26. This note records current source-backed facts for the
 cross-client pstack design. URLs are intentionally included so a later sync
-can re-check any fact that may drift.
+can re-check any fact that may drift. It is a dated research snapshot; the
+implemented design is documented in [platform support](./platform-support.md)
+and may differ from recommendations below.
 
 ## Executive findings
 
@@ -180,10 +182,10 @@ duplicating its release and Claude-distribution work.
 
 The smallest useful upstream PR is one cohesive portability core inside
 `cursor/plugins/pstack`: the strict Agent Plugins manifest, thin native package
-manifests, one adapter reference, portable custom-agent skills with thin native
-wrappers, repository-local model configuration, focused documentation, and a
-dependency-free validator. Benny stays a named Cursor extension and is not
-translated.
+manifests, one adapter reference, native custom-agent definitions with an
+adapter-directed fallback, client-specific model configuration, focused
+documentation, and a dependency-free validator. Benny stays a named Cursor
+extension and is not translated.
 
 Repository-level Codex and Claude marketplace catalogs, publication workflow,
 release synchronization, and future client-native hooks or command trampolines
@@ -200,13 +202,13 @@ clients:
 
 - Claude Code 2.1.246 passed strict validation for both the pstack plugin and
   the repository marketplace.
-- Codex CLI 0.149.1 exposed its plugin subsystem and completed the read-only
-  `plugin list --json` smoke check. The pstack marketplace was not registered
-  because that would mutate user configuration. This CLI exposes no standalone
-  package-validation command.
+- Codex CLI 0.149.1 registered the repository marketplace and installed pstack
+  end to end under an isolated `CODEX_HOME`. The installed package contained all
+  44 shared skills and both native agent definitions. This CLI exposes no
+  standalone package-validation command.
 - Cursor 3.17.21 was available, but exposes no headless plugin validator.
 - `node pstack/scripts/validate-cross-client.mjs` validated four manifests,
-  three marketplaces, 46 shared skills, and 254 local Markdown links without
+  three marketplaces, 44 shared skills, and 247 local Markdown links without
   third-party dependencies.
 
 The repository's existing Ajv validator was unavailable because dependencies

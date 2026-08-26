@@ -5,10 +5,7 @@ description: "Use for 'why does X work this way', 'why we picked Y', design rati
 
 # Why
 
-Before following instructions that name client-specific tools, models, or paths,
-use the matching entry in the [platform
-adapters](../poteto-mode/references/platform-adapters.md). Preserve the
-workflow's intent while using the active client's equivalent.
+On a client other than Cursor, resolve any client-specific tool, model, or path this skill names through the [platform adapters](../poteto-mode/references/platform-adapters.md) before following it.
 
 Investigate the motivation and intent behind code. Why was it built this way? What edge cases were considered? What product, business, or operational constraints shaped the design? What alternatives were rejected, and why?
 

@@ -6,10 +6,7 @@ disable-model-invocation: true
 
 # Architect
 
-Before following instructions that name client-specific tools, models, or paths,
-use the matching entry in the [platform
-adapters](../poteto-mode/references/platform-adapters.md). Preserve the
-workflow's intent while using the active client's equivalent.
+On a client other than Cursor, resolve any client-specific tool, model, or path this skill names through the [platform adapters](../poteto-mode/references/platform-adapters.md) before following it.
 
 Design before implementing. Sketch types, function signatures, class shapes, and module boundaries with `not implemented` bodies and pseudocode. Synthesize across multiple model perspectives, then fill in code against the chosen sketch. If implementation proves the sketch wrong, throw it out and redesign.
 
