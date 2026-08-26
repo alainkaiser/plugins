@@ -151,38 +151,3 @@ sequentially and must be disclosed.
 No cross-client hooks ship. Hooks have client-specific trust, lifecycle, and
 configuration contracts. A future hook should be a named native extension,
 not a hidden translation or a second skills tree.
-
-## Prior art and collaboration
-
-[`michael-denyer/pstack-claude`](https://github.com/michael-denyer/pstack-claude)
-is active strong prior art. At the audited commits it was synced to upstream
-pstack v0.14.2 while upstream was v0.14.3, so it was one patch behind rather
-than materially stale. It preserves Lauren Tan's MIT license and documents
-additional attributions for imported material.
-
-Its shared-tree layout, mapping references, explicit exclusions, and native
-Claude packaging are useful evidence. Its extra hooks, commands, imported
-`cursor-team-kit` skills, and v0.14.2 edits are not copied wholesale here.
-Every adaptation in this package is checked against current upstream and the
-current client contract.
-
-Collaboration is cheaper than maintaining two editorial ports. The preferred
-direction is one upstream-owned pstack skill tree, with the existing port used
-as a compatibility testbed or downstream distribution layer if its maintainer
-agrees.
-
-## Recommended repository split
-
-The smallest useful upstream PR to `cursor/plugins/pstack` is the portability
-core: the strict root Agent Plugins manifest, thin native package manifests,
-one adapter reference, the one-line adapter pointer in the skills that name
-client primitives, focused docs, and the dependency-free validator. Benny
-remains a named Cursor extension in that PR.
-
-Repository-level Codex and Claude marketplace catalogs, publication workflow,
-release synchronization, and any future client-native hooks or command
-trampolines should remain in this cross-client fork unless the
-`cursor/plugins` maintainers explicitly want to operate those distribution
-surfaces for the whole monorepo. That split gives upstream one maintainable
-skills source without imposing cross-client marketplace policy on Cursor's
-repository.
