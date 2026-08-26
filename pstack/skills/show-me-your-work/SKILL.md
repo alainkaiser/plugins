@@ -6,6 +6,11 @@ disable-model-invocation: true
 
 # Show me your work
 
+Before using a client-specific tool, model, path, transcript, or subagent
+option, read the [platform
+adapters](../poteto-mode/references/platform-adapters.md). Its active-client
+mapping overrides the mechanism below.
+
 For work a human reviews after the fact, a decision trail lets them reconstruct what was decided, why, and on what evidence, without rerunning the work or reading the whole transcript. Keep one canonical log so the trail is consistent and a future agent can find it.
 
 ## The format
@@ -53,7 +58,12 @@ Commit it only when the work is ambitious enough that a reviewer needs the trail
 
 ## Audit the log against the transcript
 
-At the end of the run, before handing back, check the log told the truth. Read this run's transcript under the active workspace's `agent-transcripts/` directory (the system prompt names the path). Don't glob across `~/.cursor/projects/*/`; that reads unrelated private chats. Walk the log against what actually happened:
+At the end of the run, before handing back, check that the log told the truth.
+Resolve this run's transcript or task history through the platform adapter. Use
+only the current session or workspace scope. Never glob across every project in
+a private client directory. If scoped history is unavailable, audit against the
+current conversation and live evidence, then disclose that the raw transcript
+check was unavailable. Walk the log against what actually happened:
 
 - Every row maps to a real action. Cut invented or aspirational entries.
 - Each row's evidence resolves and shows what the row claims.
@@ -64,7 +74,13 @@ Fix the log, not the story. If the work diverged from what a row claims, the row
 
 ## Cross-model review of the trail
 
-Before handing back, you must spawn a subagent on a different model family from the one that did the work. Self-review is not a substitute; the point is fresh eyes you cannot bring yourself. The subagent reads the audit trail and the run's transcript, then flags what the user should pay attention to. Not a redo of the work, a scan for what's suboptimal or risky.
+Before handing back, spawn a subagent on a different confirmed model family
+from the one that did the work when the active client supports that choice. If
+it does not, use an independent subagent on the inherited model and disclose
+the reduced model diversity. The subagent reads the audit trail and the run's
+scoped transcript, task history, or session digest, then flags what the user
+should pay attention to. This is not a redo of the work. It is a scan for what
+is suboptimal or risky.
 
 - Decisions logged with weak or absent evidence.
 - Verification steps skipped or claimed without proof in the transcript.

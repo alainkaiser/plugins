@@ -6,6 +6,11 @@ disable-model-invocation: true
 
 # Reflect
 
+Before using a client-specific tool, model, path, transcript, or subagent
+option, read the [platform
+adapters](../poteto-mode/references/platform-adapters.md). Its active-client
+mapping overrides the mechanism below.
+
 Mine the current conversation for durable learnings, then route them into skill edits.
 
 ## When to invoke
@@ -22,15 +27,25 @@ Skip when the conversation is trivial, off-topic, or already covered by an exist
 
 ### 1. Locate the active transcript
 
-The parent finds its own transcript file before fanning out. The system prompt names the active workspace's `agent-transcripts/` directory; use that path. Do not glob across `~/.cursor/projects/*/`. That crosses workspace boundaries and reads private chats from unrelated projects.
+Resolve the current transcript through the platform adapter before fanning out.
+Use only a session path or workspace-scoped history facility supplied by the
+active client. Never glob across every project in a private client directory.
+
+When Cursor supplies the active workspace's `agent-transcripts/` directory,
+the following scoped lookup covers its supported legacy and current layouts:
 
 ```bash
 ls -t <agent-transcripts>/*.jsonl <agent-transcripts>/*/*.jsonl <agent-transcripts>/*/subagents/*.jsonl 2>/dev/null | head -10
 ```
 
-Three transcript layouts: legacy flat (`<id>.jsonl`), current nested (`<id>/<id>.jsonl`), and subagent (`<parent>/subagents/<child>.jsonl`).
+The Cursor layouts are legacy flat (`<id>.jsonl`), current nested
+(`<id>/<id>.jsonl`), and subagent
+(`<parent>/subagents/<child>.jsonl`).
 
-For each candidate, read the first JSONL line and check that `message.content[0].text` contains the conversation's opening user prompt. Take the matching path. If no path resolves, write a tight digest of the session and pass that instead.
+For each Cursor candidate, read the first JSONL line and check that
+`message.content[0].text` contains the conversation's opening user prompt. Take
+the matching path. On any client, if no scoped path or history facility
+resolves, write a tight digest of the session and pass that instead.
 
 ### 2. Spawn three reviewers in parallel
 
@@ -61,9 +76,9 @@ Backlog items file to whatever devex / backlog tracker your team uses automatica
 For each approved Accepted item, follow the Routing field exactly:
 
 - Trivial existing-skill edit (a one-line bullet, a tightened sentence, a stale fact corrected): parent does directly.
-- Substantive existing-skill edit (a new section, a new pattern table, more than ~10 lines): hand to Cursor's built-in `create-skill` skill and run its draft / test / iterate loop.
-- `tune description: <skill path>` (the skill exists but didn't trigger when it should have): hand to `create-skill` and run its description-optimization loop.
-- `new skill via create-skill: <kebab-name>`: hand creation to `create-skill`. Do not invent the shape ad hoc.
+- Substantive existing-skill edit (a new section, a new pattern table, more than ~10 lines): hand it to the active client's skill-authoring facility from the adapter and run its draft, test, and iterate loop.
+- `tune description: <skill path>` (the skill exists but did not trigger when it should have): use the active skill-authoring facility and run its description-optimization loop.
+- `new skill: <kebab-name>`: hand creation to the active skill-authoring facility. Do not invent the shape ad hoc.
 
 If your environment ships a SKILL.md validator, run it on every touched skill before declaring done. Skip this step if it doesn't.
 

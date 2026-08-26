@@ -6,6 +6,11 @@ disable-model-invocation: true
 
 # Interrogate
 
+Before using a client-specific tool, model, path, transcript, or subagent
+option, read the [platform
+adapters](../poteto-mode/references/platform-adapters.md). Its active-client
+mapping overrides the mechanism below.
+
 Spawn one reviewer per configured model to adversarially review code changes. Each model gets the same prompt and rubric. The adversarial signal comes from model diversity, not assigned personas. Models differ in blind spots, priors, and reasoning patterns. Agreement across models is high-confidence signal; lone-model findings are worth reading but lower confidence.
 
 The deliverable is a synthesized verdict. Do NOT auto-apply changes.
@@ -33,7 +38,7 @@ Write one clear paragraph. Reviewers challenge whether the work achieves the int
 
 ## Step 3, Spawn Reviewers
 
-Launch all reviewers in a single message using the Task tool. Use the `interrogate reviewers` list from `~/.cursor/rules/pstack-models.mdc` when present, one reviewer per entry, extending or shrinking the Reviewer A/B/C/D labels below to the configured entry count; otherwise use the table defaults.
+Launch all reviewers using the active client's parallel subagent mechanism. Use the `interrogate reviewers` list from the active pstack model configuration defined by the platform adapter when present, one reviewer per entry, extending or shrinking the Reviewer A/B/C/D labels below to the configured entry count. Otherwise use the table defaults after resolving them for the active client.
 
 | Subagent | Default model |
 |----------|---------------|
