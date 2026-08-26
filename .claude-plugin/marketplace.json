@@ -1,8 +1,8 @@
 {
   "name": "cursor-plugins",
   "owner": {
-    "name": "Cursor",
-    "email": "plugins@cursor.com"
+    "name": "Alain Kaiser",
+    "url": "https://github.com/alainkaiser"
   },
   "description": "Cross-client packages from cursor/plugins.",
   "plugins": [
