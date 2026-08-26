@@ -4,6 +4,10 @@ on:
   pull_request:
     paths:
       - ".cursor-plugin/marketplace.json"
+      - ".agents/plugins/marketplace.json"
+      - ".claude-plugin/marketplace.json"
+      - ".github/workflows/validate-plugins.yml"
+      - "pstack/**"
       - "**/plugin.json"
       - "schemas/**"
 
@@ -22,3 +26,6 @@ jobs:
 
       - name: Validate plugin definitions
         run: node scripts/validate-plugins.mjs
+
+      - name: Validate pstack cross-client package
+        run: node pstack/scripts/validate-cross-client.mjs

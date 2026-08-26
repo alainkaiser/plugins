@@ -5,6 +5,8 @@ description: "Use for 'why does X work this way', 'why we picked Y', design rati
 
 # Why
 
+On a client other than Cursor, resolve any client-specific tool, model, or path this skill names through the [platform adapters](../poteto-mode/references/platform-adapters.md) before following it.
+
 Investigate the motivation and intent behind code. Why was it built this way? What edge cases were considered? What product, business, or operational constraints shaped the design? What alternatives were rejected, and why?
 
 Companion to the `how` skill. `how` answers what the code does and how it works. `why` answers what forces led to its shape.
@@ -97,7 +99,7 @@ Capture this as seed context (file paths, symbols, commits, PR numbers, linked t
 
 ### Discovery
 
-Before spawning investigators, list the available MCPs from the Cursor environment. Use the available-tools map when present. Otherwise inspect the `mcps/` directory Cursor exposes for enabled MCP servers.
+Before spawning investigators, inspect the active host's exposed MCP and tool inventory through the platform adapter. Use only servers and tools available to this session. Treat client CLI lists as supplemental because they may omit host-provided tools.
 
 Map each available MCP to one evidence category:
 
@@ -117,7 +119,7 @@ Launch all matching investigators in a single message so they run concurrently. 
 
 Subagent config (each):
 - `subagent_type`: `generalPurpose`
-- `model`: your configured why-investigators model (default `grok-4.6-fast-xhigh`)
+- `model`: your configured why-investigators model (default `cursor-grok-4.6-xhigh-fast`)
 - `readonly`: `false` (agent mode). **Do not use readonly/Ask mode.** It strips MCP access, which disables MCP-backed investigators entirely. The source control investigator would be safe in readonly, but keep modes uniform. Investigators still shouldn't write anything. That's a posture, not a sandbox.
 
 Each investigator gets:

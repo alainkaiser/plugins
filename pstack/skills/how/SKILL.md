@@ -5,6 +5,8 @@ description: "Use for \"how does X work\", code walkthroughs before changing som
 
 # How
 
+On a client other than Cursor, resolve any client-specific tool, model, or path this skill names through the [platform adapters](../poteto-mode/references/platform-adapters.md) before following it.
+
 Explore the codebase to answer "how does X work?" questions. Produce clear architectural explanations at the level of a senior engineer onboarding onto a subsystem. Enough to build a working mental model, not annotated source code.
 
 Two modes:
@@ -45,7 +47,7 @@ The right decomposition depends on the question. Use your judgment. Narrow quest
 Spawn all explorers in a single message:
 
 - `subagent_type`: `generalPurpose`
-- `model`: your configured how-explorer model (default `grok-4.6-fast-xhigh`)
+- `model`: your configured how-explorer model (default `cursor-grok-4.6-xhigh-fast`)
 - `readonly`: `true`
 
 Each explorer gets the same base prompt from `references/explorer-prompt.md` plus a specific exploration angle naming its slice. Each explorer should:
@@ -109,7 +111,7 @@ Run the full explain flow above (Steps 1-4). You must understand the architectur
 
 ### Step 2. Spawn Critics
 
-After the explanation is complete, spawn one architectural critic per model in your configured how-critics list (defaults `claude-fable-5-thinking-max`, `gpt-5.6-sol-max`, `grok-4.6-fast-xhigh`, `claude-opus-5-thinking-xhigh`), all in a single message.
+After the explanation is complete, spawn one architectural critic per model in your configured how-critics list (defaults `claude-fable-5-thinking-max`, `gpt-5.6-sol-max`, `cursor-grok-4.6-xhigh-fast`, `claude-opus-5-thinking-xhigh`), all in a single message.
 
 For each critic:
 - `subagent_type`: `generalPurpose`

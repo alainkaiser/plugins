@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 # Automate me
 
+On a client other than Cursor, resolve any client-specific tool, model, or path this skill names through the [platform adapters](../poteto-mode/references/platform-adapters.md) before following it.
+
 A guided flow for turning the user's working conventions into a skill agents will follow. The output is one `-mode` skill tailored to them (e.g. `jay-mode`, `priya-mode`).
 
 This skill orchestrates three others: an inline mining pass (see step 1), Cursor's built-in `create-skill` (authoring), and the **unslop** skill (prose discipline). It sequences them; it doesn't replace them.

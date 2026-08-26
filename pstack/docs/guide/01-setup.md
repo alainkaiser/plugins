@@ -12,6 +12,8 @@ In a Cursor chat, run:
 
 Cursor confirms the plugin is installed.
 
+For Codex, Claude Code, or a local Cursor checkout, use the [self-hosted install instructions](../platform-support.md#self-hosted-installation).
+
 ## Pick your models
 
 Run:
@@ -20,7 +22,9 @@ Run:
 /setup-pstack
 ```
 
-[`/setup-pstack`](../../skills/setup-pstack/SKILL.md) detects the models you have access to, shows you each role (code delegates, judgment, the review panels), and asks what you want. Answer the questions. It writes `~/.cursor/rules/pstack-models.mdc`, a small rule every pstack skill reads.
+[`/setup-pstack`](../../skills/setup-pstack/SKILL.md) detects the models the active client can use, shows you each role (code delegates, judgment, the review panels), and asks what you want. Answer the questions. It writes a client-specific user configuration by default: Cursor uses `~/.cursor/rules/pstack-models.mdc`, Codex uses `~/.codex/pstack/models.md` (or `$CODEX_HOME`), and Claude Code uses `~/.claude/pstack/models.md` (or `$CLAUDE_CONFIG_DIR`). The [platform adapter](../../skills/poteto-mode/references/platform-adapters.md#configuration-and-models) defines the exact paths and precedence.
+
+The default is global for that client, so setup works in a projectless session and applies across repositories. It does not write another client's settings. The Codex and Claude Code paths are pstack-owned files that pstack skills read explicitly, not native host config keys. Project scope is available only when you explicitly request it, and uses that client's own project directory rather than a shared pstack file.
 
 You only override what you care about. A role with no line in the rule keeps the skill's default. To restore a default later, delete that role's line, or just run `/setup-pstack` again.
 
@@ -30,9 +34,9 @@ You might be wondering what happens if you use Auto. Set a role to `inherit-pare
 
 At the end of setup, `/setup-pstack` looks for a way to prove app behavior in your project, either a `verify-*` skill or an existing harness. If it finds neither, it offers once to generate one with [`/create-verification-skill`](../../skills/create-verification-skill/SKILL.md).
 
-Say yes and it writes `.cursor/skills/verify-<app>/`, a project-local skill that teaches agents to drive your app the way a user does. It proves the skill works once before handing it over. Say no and setup moves on. You can run `/create-verification-skill` yourself any time. [Verify and ship](./06-verify-and-ship.md#create-a-project-verification-skill) covers when it earns its place.
+Say yes and it writes under the active client's project skill root, a project-local skill that teaches agents to drive your app the way a user does. It proves the skill works once before handing it over. Say no and setup moves on. In a projectless session this offer is skipped. You can run `/create-verification-skill` yourself any time. [Verify and ship](./06-verify-and-ship.md#create-a-project-verification-skill) covers when it earns its place.
 
-After setup, start a new chat. The model rule applies to new sessions.
+After setup, start a new chat. The model configuration applies to new sessions for that client.
 
 ## Run your first task
 

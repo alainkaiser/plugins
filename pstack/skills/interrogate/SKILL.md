@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 # Interrogate
 
+On a client other than Cursor, resolve any client-specific tool, model, or path this skill names through the [platform adapters](../poteto-mode/references/platform-adapters.md) before following it.
+
 Spawn one reviewer per configured model to adversarially review code changes. Each model gets the same prompt and rubric. The adversarial signal comes from model diversity, not assigned personas. Models differ in blind spots, priors, and reasoning patterns. Agreement across models is high-confidence signal; lone-model findings are worth reading but lower confidence.
 
 The deliverable is a synthesized verdict. Do NOT auto-apply changes.
@@ -33,13 +35,13 @@ Write one clear paragraph. Reviewers challenge whether the work achieves the int
 
 ## Step 3, Spawn Reviewers
 
-Launch all reviewers in a single message using the Task tool. Use the `interrogate reviewers` list from `~/.cursor/rules/pstack-models.mdc` when present, one reviewer per entry, extending or shrinking the Reviewer A/B/C/D labels below to the configured entry count; otherwise use the table defaults.
+Launch all reviewers in a single message using the active client's subagent tool. Use the `interrogate reviewers` list from the active client's effective pstack model configuration when present, one reviewer per entry, extending or shrinking the Reviewer A/B/C/D labels below to the configured entry count; otherwise use the table defaults.
 
 | Subagent | Default model |
 |----------|---------------|
 | Reviewer A | `claude-fable-5-thinking-max` |
 | Reviewer B | `gpt-5.6-sol-max` |
-| Reviewer C | `grok-4.6-fast-xhigh` |
+| Reviewer C | `cursor-grok-4.6-xhigh-fast` |
 | Reviewer D | `claude-opus-5-thinking-xhigh` |
 
 For each reviewer:

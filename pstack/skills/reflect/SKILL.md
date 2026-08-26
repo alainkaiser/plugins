@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 # Reflect
 
+On a client other than Cursor, resolve any client-specific tool, model, or path this skill names through the [platform adapters](../poteto-mode/references/platform-adapters.md) before following it.
+
 Mine the current conversation for durable learnings, then route them into skill edits.
 
 ## When to invoke

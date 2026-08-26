@@ -1,13 +1,18 @@
 ---
-name: Make Bot UI
+name: make-bot-ui
 description: >-
   Use when building a custom UI (page, dashboard, buttons) that should wake a
   Grok Bot over a webhook, when the user must provide a webhook sender key, or
   when exposing that UI on Tailscale.
+compatibility: Cursor only. Requires Routines, update_state, SendToUser secret requests, and api2.cursor.sh.
 ---
 # How to make a bot UI
 
 Build a page the user clicks. A server on this computer POSTs JSON to a webhook routine. The bot wakes with that JSON. Keep the sender key on the server. Do not put the sender key in the browser, in chat, or in this skill.
+
+## Check client support
+
+Before any other step, confirm that the active client is Cursor and exposes `update_state`, the Routines UI, and `SendToUser` secret requests. If it does not, stop and state that this skill is Cursor-only. Do not request a credential.
 
 ## Create the webhook routine
 

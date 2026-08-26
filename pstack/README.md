@@ -18,6 +18,10 @@ fork it. improve it. make it yours. PRs are welcome!
 /add-plugin pstack
 ```
 
+### codex and claude code
+
+this fork also packages pstack for codex and claude code from the same `skills/` tree through native manifests. install instructions, the capability matrix, and what stays cursor-only live in [platform support](./docs/platform-support.md). the skills keep their original cursor wording; on another client, the [platform adapters](./skills/poteto-mode/references/platform-adapters.md) reference maps each cursor-specific tool, model, or path to that client's equivalent.
+
 ## get started
 
 two steps:
@@ -189,7 +193,7 @@ pstack also ships a subagent that runs my style end to end. spawn it from a pare
 
 [`/poteto-mode`](./skills/poteto-mode/SKILL.md) and [`subagent_type: "poteto-agent"`](./agents/poteto-agent.md) route through the same wrapper.
 
-pstack also ships [Comment Sicko](./agents/comment-sicko.md), a read-only comment reviewer available as `subagent_type: "Comment Sicko"`. usually invoke it through [`/no-comments`](./skills/no-comments/SKILL.md), not directly.
+pstack also ships [Comment Sicko](./agents/comment-sicko.md), a report-only comment reviewer available as `subagent_type: "comment-sicko"`. usually invoke it through [`/no-comments`](./skills/no-comments/SKILL.md), not directly.
 
 ## principles
 
@@ -244,7 +248,7 @@ cursor already has a great plan mode which works great with pstack. but personal
 
 type [`/automate-me`](./skills/automate-me/SKILL.md). it mines your recent transcripts, drafts a `<your-name>-mode` skill from how you've actually worked, and routes through pstack underneath. you keep pstack as the base and end up with your own routing skill alongside `poteto-mode`.
 
-models are configurable too. type [`/setup-pstack`](./skills/setup-pstack/SKILL.md). it detects the models you have access to and writes a small always-applied rule mapping each role (code, judgment, the review panels) to a model. every skill reads it and falls back to sensible defaults when the rule is absent, so you override only what you want.
+models are configurable too. type [`/setup-pstack`](./skills/setup-pstack/SKILL.md). it detects the models the active client can use and writes a client-specific user configuration mapping each role (code, judgment, the review panels) to a model. every skill reads it and falls back to sensible defaults when the configuration is absent, so you override only what you want without changing another agent's setup.
 
 ## automations
 

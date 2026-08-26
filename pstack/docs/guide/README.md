@@ -2,6 +2,11 @@
 
 pstack works best when you stop micromanaging the agent. You describe what you want and how you'll know it's done. `/poteto-mode` picks the playbook, runs the other skills as the steps need them, and shows you the evidence. This guide teaches that habit with realistic prompts.
 
+This guide keeps pstack's original Cursor slash syntax and names Cursor-only
+surfaces when it uses them. Codex and Claude Code users should apply the same
+workflow through the [platform adapter](../../skills/poteto-mode/references/platform-adapters.md)
+and use the install instructions in [platform support](../platform-support.md).
+
 Here's what you'll learn:
 
 1. [Set up pstack](./01-setup.md). Install the plugin and pick your models.
