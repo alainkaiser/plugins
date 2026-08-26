@@ -5,10 +5,10 @@ description: "Use for \"how does X work\", code walkthroughs before changing som
 
 # How
 
-Before using a client-specific tool, model, path, transcript, or subagent
-option, read the [platform
-adapters](../poteto-mode/references/platform-adapters.md). Its active-client
-mapping overrides the mechanism below.
+Before following instructions that name client-specific tools, models, or paths,
+use the matching entry in the [platform
+adapters](../poteto-mode/references/platform-adapters.md). Preserve the
+workflow's intent while using the active client's equivalent.
 
 Explore the codebase to answer "how does X work?" questions. Produce clear architectural explanations at the level of a senior engineer onboarding onto a subsystem. Enough to build a working mental model, not annotated source code.
 

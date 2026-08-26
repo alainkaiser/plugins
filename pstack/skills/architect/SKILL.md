@@ -6,10 +6,10 @@ disable-model-invocation: true
 
 # Architect
 
-Before using a client-specific tool, model, path, transcript, or subagent
-option, read the [platform
-adapters](../poteto-mode/references/platform-adapters.md). Its active-client
-mapping overrides the mechanism below.
+Before following instructions that name client-specific tools, models, or paths,
+use the matching entry in the [platform
+adapters](../poteto-mode/references/platform-adapters.md). Preserve the
+workflow's intent while using the active client's equivalent.
 
 Design before implementing. Sketch types, function signatures, class shapes, and module boundaries with `not implemented` bodies and pseudocode. Synthesize across multiple model perspectives, then fill in code against the chosen sketch. If implementation proves the sketch wrong, throw it out and redesign.
 

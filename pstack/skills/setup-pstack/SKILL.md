@@ -5,10 +5,10 @@ description: Configure which models pstack uses per role. Detects models support
 
 # Setup pstack
 
-Before using a client-specific tool, model, path, transcript, or subagent
-option, read the [platform
-adapters](../poteto-mode/references/platform-adapters.md). Its active-client
-mapping overrides the mechanism below.
+Before following instructions that name client-specific tools, models, or paths,
+use the matching entry in the [platform
+adapters](../poteto-mode/references/platform-adapters.md). Preserve the
+workflow's intent while using the active client's equivalent.
 
 Write `.pstack/models.md` at the target repository root. It sets pstack's
 model per role without coupling the repository to one client. The skills read

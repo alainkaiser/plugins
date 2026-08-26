@@ -5,10 +5,10 @@ description: "Use for 'why does X work this way', 'why we picked Y', design rati
 
 # Why
 
-Before using a client-specific tool, model, path, transcript, or subagent
-option, read the [platform
-adapters](../poteto-mode/references/platform-adapters.md). Its active-client
-mapping overrides the mechanism below.
+Before following instructions that name client-specific tools, models, or paths,
+use the matching entry in the [platform
+adapters](../poteto-mode/references/platform-adapters.md). Preserve the
+workflow's intent while using the active client's equivalent.
 
 Investigate the motivation and intent behind code. Why was it built this way? What edge cases were considered? What product, business, or operational constraints shaped the design? What alternatives were rejected, and why?
 

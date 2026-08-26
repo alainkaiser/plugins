@@ -6,10 +6,10 @@ disable-model-invocation: true
 
 # Swarm
 
-Before using a client-specific tool, model, path, transcript, or subagent
-option, read the [platform
-adapters](../poteto-mode/references/platform-adapters.md). Its active-client
-mapping overrides the mechanism below.
+Before following instructions that name client-specific tools, models, or paths,
+use the matching entry in the [platform
+adapters](../poteto-mode/references/platform-adapters.md). Preserve the
+workflow's intent while using the active client's equivalent.
 
 Fan out N workers through the active client's subagent mechanism. They may
 cover separate slices, race the same brief, or mix both. The parent waits,

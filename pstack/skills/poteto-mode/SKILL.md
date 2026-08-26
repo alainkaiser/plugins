@@ -12,10 +12,10 @@ reminder: New task? Playbook match or rigor needed -> apply /poteto-mode. Casual
 
 ## Platform contract
 
-Before following an instruction that names a tool, model, path, transcript,
-built-in, hook, or subagent option, read the [platform
-adapters](references/platform-adapters.md). The active-client mapping overrides
-the literal mechanism below while preserving the workflow's intent.
+Before following instructions that name client-specific tools, models, or paths,
+use the matching entry in the [platform
+adapters](references/platform-adapters.md). Preserve the workflow's intent while
+using the active client's equivalent.
 
 ## Non-negotiables
 
