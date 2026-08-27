@@ -14,7 +14,8 @@ client discovers and runs those skills. They do not create independent ports.
 | Structured questions | `AskQuestion` | `request_user_input` when exposed, otherwise plain text | `AskUserQuestion` | Plain text |
 | Parallel subagents | `Task` | Codex subagent facility | `Agent` | Not standardized; run sequentially |
 | Model selection | Cursor-confirmed slug | Host-confirmed model and reasoning effort | Claude-confirmed model | Inherit parent |
-| Project model configuration | `~/.cursor/rules/pstack-models.mdc` (upstream) | `.pstack/models.md` at the repository root | `.pstack/models.md` at the repository root | Not standardized |
+| pstack user model configuration | `~/.cursor/rules/pstack-models.mdc` | `$CODEX_HOME/pstack/models.md` | `$CLAUDE_CONFIG_DIR/pstack/models.md` | Not standardized |
+| pstack project model override | `.cursor/rules/pstack-models.mdc` (opt-in) | `.codex/pstack/models.md` (opt-in) | `.claude/pstack/models.md` (opt-in) | Not standardized |
 | Transcript access | Session path or workspace-scoped Cursor transcript | Current task or thread history exposed by the host | Current or resumed session history | Conversation context or user export |
 | Repeat or wake | `/loop` | Monitor, scheduled task, or heartbeat when exposed | `/loop` or scheduled-task tools | Not standardized |
 | Hooks shipped by pstack | None | None | None | Not standardized |
@@ -67,6 +68,10 @@ codex plugin add pstack@cursor-plugins
 ```
 
 The repository marketplace is declared at `.agents/plugins/marketplace.json`.
+`codex plugin marketplace add` tracks the source independently of the current
+repository, and installed plugin state is user-level. See OpenAI's [plugin
+packaging guide](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli).
+This install is therefore available without assigning a repository.
 Restart the client if it asks you to refresh plugin discovery.
 
 ### Claude Code
@@ -77,12 +82,16 @@ Load the plugin for one development session:
 claude --plugin-dir /absolute/path/to/plugins/pstack
 ```
 
-Or register this checkout as a local marketplace and install pstack:
+Or register this checkout as a local marketplace and install pstack at user
+scope (Claude Code's default), making it available across projects:
 
 ```bash
-claude plugin marketplace add /absolute/path/to/plugins --scope local
-claude plugin install pstack@cursor-plugins --scope local
+claude plugin marketplace add /absolute/path/to/plugins
+claude plugin install pstack@cursor-plugins
 ```
+
+Pass `--scope local` to `claude plugin install` only when you intentionally want
+a project-specific, unshared installation.
 
 ### Cursor
 

@@ -57,11 +57,39 @@ client cannot provide the requested isolation, do not claim that it did.
 
 ## Configuration and models
 
-On Cursor, `setup-pstack` writes `~/.cursor/rules/pstack-models.mdc` exactly as
-upstream describes. On Codex and Claude Code, which do not read Cursor rules,
-`setup-pstack` writes `.pstack/models.md` at the target repository root instead,
-with the same role lines and the same shape minus the Cursor rule frontmatter.
-Wherever a skill reads the Cursor rule, read the file for the active client.
+`setup-pstack` writes only the active client's configuration. User scope is the
+default and works without a repository. Project scope is an explicit opt-in.
+
+| Scope | Cursor | Codex | Claude Code | Agent Plugins 1.0 floor |
+| --- | --- | --- | --- | --- |
+| User (default) | `~/.cursor/rules/pstack-models.mdc` | `$CODEX_HOME/pstack/models.md` (default `~/.codex/pstack/models.md`) | `$CLAUDE_CONFIG_DIR/pstack/models.md` (default `~/.claude/pstack/models.md`) | Not standardized |
+| Project (opt-in) | `$REPO_ROOT/.cursor/rules/pstack-models.mdc` | `$REPO_ROOT/.codex/pstack/models.md` | `$REPO_ROOT/.claude/pstack/models.md` | Not standardized |
+
+These are pstack-owned files. Cursor recognizes its `.mdc` files as rules;
+Codex and Claude Code do not natively discover the pstack Markdown paths. Before
+choosing a model, every pstack skill must explicitly read the active client's
+effective configuration through this adapter.
+
+Resolve an effective configuration in this order: the active client's project
+file, the active client's user file, the legacy shared
+`$REPO_ROOT/.pstack/models.md`, then inline defaults. The legacy file is a
+read-only compatibility fallback, not a setup target. When it is used, disclose
+that Codex and Claude Code may both see the same mapping and recommend migrating
+each client with `setup-pstack`. Never read another client's path.
+
+Cursor files include rule frontmatter with `alwaysApply: true`. Codex and Claude
+Code files contain only the role lines and comments. Do not put the role map in
+`AGENTS.md`, `CLAUDE.md`, or a cross-client config file: pstack skills read it
+on demand.
+
+Codex model and reasoning effort are separate spawn fields. pstack encodes a
+Codex selector as `<model>@<reasoning-effort>` (for example,
+`gpt-5.6-sol@max`). Require exactly one `@` with non-empty values on both sides,
+validate that exact pair against the active host, then pass the two fields
+separately. This is pstack serialization, not Codex-native model syntax. Cursor
+and Claude Code selectors use the exact client-confirmed slug accepted by their
+subagent facility. `inherit-parent` and `auto` omit every explicit model and
+reasoning-effort field.
 
 Inline model slugs in upstream skills are Cursor defaults. On another client,
 use one only when the active host confirms that exact slug. Otherwise omit the

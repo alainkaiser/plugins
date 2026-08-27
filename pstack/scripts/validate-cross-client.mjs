@@ -175,11 +175,24 @@ for (const directory of skillDirectories) {
 
 const adapterPath = resolve(skillsRoot, "poteto-mode/references/platform-adapters.md");
 const adapterText = readText(adapterPath);
-for (const required of ["Cursor", "Codex", "Claude Code", "Agent Plugins 1.0 floor", ".pstack/models.md"]) {
+for (const required of [
+  "Cursor",
+  "Codex",
+  "Claude Code",
+  "Agent Plugins 1.0 floor",
+  "~/.cursor/rules/pstack-models.mdc",
+  "$CODEX_HOME/pstack/models.md",
+  "$CLAUDE_CONFIG_DIR/pstack/models.md",
+  ".pstack/models.md",
+  "<model>@<reasoning-effort>",
+  "every pstack skill must explicitly read",
+  "pstack serialization, not Codex-native model syntax",
+]) {
   assert(adapterText.includes(required), `platform adapter is missing ${required}`);
 }
 
 const cursorOnlyPattern = /\bTask\b|AskQuestion|subagent_type|run_in_background|~\/\.cursor|\.cursor\/|agent-transcripts|cursor-team-kit|\/loop|Cursor(?:'s)? built-in|grok-4\.6|claude-(?:fable|opus)-5|gpt-5\.6-sol/;
+const directModelConfigPath = /~\/\.cursor\/rules\/pstack-models\.mdc|\$CODEX_HOME\/pstack\/models\.md|\$CLAUDE_CONFIG_DIR\/pstack\/models\.md/;
 for (const directory of skillDirectories) {
   const skillPath = resolve(skillsRoot, directory.name, "SKILL.md");
   if (!existsSync(skillPath)) continue;
@@ -187,7 +200,12 @@ for (const directory of skillDirectories) {
   if (cursorOnlyPattern.test(text)) {
     assert(text.includes("platform-adapters.md"), `skills/${directory.name}/SKILL.md uses a client primitive without the platform adapter`);
   }
+  assert(!directModelConfigPath.test(text), `skills/${directory.name}/SKILL.md names a client model-config path instead of using the platform adapter`);
 }
+
+const setupText = readText(resolve(skillsRoot, "setup-pstack/SKILL.md"));
+assert(setupText.includes("Default to that client's user scope"), "setup-pstack must default to client-specific user scope");
+assert(setupText.includes("Never write another"), "setup-pstack must forbid cross-client configuration writes");
 
 for (const name of ["comment-sicko", "poteto-agent"]) {
   assert(existsSync(resolve(pstackRoot, `agents/${name}.md`)), `agents/${name}.md is missing`);
