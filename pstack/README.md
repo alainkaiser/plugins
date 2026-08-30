@@ -20,7 +20,7 @@ fork it. improve it. make it yours. PRs are welcome!
 
 ### codex and claude code
 
-this fork also packages pstack for codex and claude code from the same `skills/` tree, via native manifests plus an [agent plugins](https://agent-plugins.org) root manifest. install instructions, the capability matrix, and what stays cursor-only live in [platform support](./docs/platform-support.md). the skills keep their original cursor wording; on another client, the [platform adapters](./skills/poteto-mode/references/platform-adapters.md) reference maps each cursor-specific tool, model, or path to that client's equivalent.
+this fork also packages pstack for codex and claude code from the same `skills/` tree through native manifests. install instructions, the capability matrix, and what stays cursor-only live in [platform support](./docs/platform-support.md). the skills keep their original cursor wording; on another client, the [platform adapters](./skills/poteto-mode/references/platform-adapters.md) reference maps each cursor-specific tool, model, or path to that client's equivalent.
 
 ## get started
 
@@ -193,7 +193,7 @@ pstack also ships a subagent that runs my style end to end. spawn it from a pare
 
 [`/poteto-mode`](./skills/poteto-mode/SKILL.md) and [`subagent_type: "poteto-agent"`](./agents/poteto-agent.md) route through the same wrapper.
 
-pstack also ships [Comment Sicko](./agents/comment-sicko.md), a read-only comment reviewer available as `subagent_type: "Comment Sicko"`. usually invoke it through [`/no-comments`](./skills/no-comments/SKILL.md), not directly.
+pstack also ships [Comment Sicko](./agents/comment-sicko.md), a report-only comment reviewer available as `subagent_type: "comment-sicko"`. usually invoke it through [`/no-comments`](./skills/no-comments/SKILL.md), not directly.
 
 ## principles
 

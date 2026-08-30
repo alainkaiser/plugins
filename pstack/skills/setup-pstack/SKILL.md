@@ -31,10 +31,8 @@ detected selectors.
 
 Resolve the effective configuration in the precedence order documented by the
 adapter. If a client-specific file exists, read it and treat its values as the
-current choices. If only the legacy shared `.pstack/models.md` exists, use it
-as a migration source, label it as shared legacy state, and write the confirmed
-choices to the active client's target in step 5. Otherwise start from the
-default role-to-model mapping shown below.
+current choices. Otherwise start from the default role-to-model mapping shown
+below.
 
 ### 3. Map and confirm
 
@@ -78,32 +76,30 @@ alwaysApply: true
 ---
 # pstack model configuration. One line per role. Delete a line to fall back to the skill default.
 # `inherit-parent` or `auto` as a value: the role runs on the parent chat model (omit the explicit model). Alias entries in a panel list still count toward its fan-out.
-feature, refactoring: grok-4.6-fast-xhigh
+feature, refactoring: cursor-grok-4.6-xhigh-fast
 bug-fix: gpt-5.6-sol-max
 perf-issue: gpt-5.6-sol-max
 hillclimb: gpt-5.6-sol-max
 judgment and prose: claude-fable-5-thinking-max
 hardest tasks: claude-fable-5-thinking-max
-how explorer: grok-4.6-fast-xhigh
+how explorer: cursor-grok-4.6-xhigh-fast
 how explainer: claude-fable-5-thinking-max
-how critics: claude-fable-5-thinking-max, gpt-5.6-sol-max, grok-4.6-fast-xhigh, claude-opus-5-thinking-xhigh
-why investigators: grok-4.6-fast-xhigh
+how critics: claude-fable-5-thinking-max, gpt-5.6-sol-max, cursor-grok-4.6-xhigh-fast, claude-opus-5-thinking-xhigh
+why investigators: cursor-grok-4.6-xhigh-fast
 why synthesizer: claude-fable-5-thinking-max
 reflect tooling: gpt-5.6-sol-max
 reflect judgment, divergent, synthesizer: claude-fable-5-thinking-max
-arena runners: claude-fable-5-thinking-max, gpt-5.6-sol-max, grok-4.6-fast-xhigh, claude-opus-5-thinking-xhigh
-arena cross-judge pool: claude-fable-5-thinking-max, gpt-5.6-sol-max, grok-4.6-fast-xhigh, claude-opus-5-thinking-xhigh
-swarm workers: grok-4.6-fast-xhigh
-architect runners: claude-fable-5-thinking-max, gpt-5.6-sol-max, grok-4.6-fast-xhigh, claude-opus-5-thinking-xhigh
-interrogate reviewers: claude-fable-5-thinking-max, gpt-5.6-sol-max, grok-4.6-fast-xhigh, claude-opus-5-thinking-xhigh
+arena runners: claude-fable-5-thinking-max, gpt-5.6-sol-max, cursor-grok-4.6-xhigh-fast, claude-opus-5-thinking-xhigh
+arena cross-judge pool: claude-fable-5-thinking-max, gpt-5.6-sol-max, cursor-grok-4.6-xhigh-fast, claude-opus-5-thinking-xhigh
+swarm workers: cursor-grok-4.6-xhigh-fast
+architect runners: claude-fable-5-thinking-max, gpt-5.6-sol-max, cursor-grok-4.6-xhigh-fast, claude-opus-5-thinking-xhigh
+interrogate reviewers: claude-fable-5-thinking-max, gpt-5.6-sol-max, cursor-grok-4.6-xhigh-fast, claude-opus-5-thinking-xhigh
 ```
 
 ### 6. Confirm
 
 Tell the user which client, scope, and path were written. The configuration
-applies to new sessions; re-running this skill updates it. If a legacy shared
-file was used as a migration source, say that it remains untouched and may
-still affect older pstack versions.
+applies to new sessions; re-running this skill updates it.
 
 ### 7. Offer a verification skill (optional)
 
@@ -113,5 +109,5 @@ Otherwise check whether the project has a way to drive the real app for proof
 project-local verification skill, so agents can drive the app the way a user
 does and prove changes work? I can generate one with
 /create-verification-skill." On yes, invoke `/create-verification-skill`
-(resolves wherever pstack is installed — workspace, user, or plugin). On no,
+(resolves wherever pstack is installed at workspace, user, or plugin scope). On no,
 move on without pushing.

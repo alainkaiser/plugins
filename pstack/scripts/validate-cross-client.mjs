@@ -64,7 +64,7 @@ function frontmatter(path) {
 
   const values = {};
   for (const line of match[1].split(/\r?\n/)) {
-    const field = line.match(/^([a-zA-Z0-9-]+):\s*(.+)$/);
+    const field = line.match(/^([a-zA-Z0-9_-]+):\s*(.+)$/);
     if (field) values[field[1]] = unquote(field[2].trim());
   }
   return values;
@@ -81,67 +81,51 @@ function markdownFiles(root) {
 }
 
 const manifests = {
-  portable: readJson(resolve(pstackRoot, "plugin.json")),
   cursor: readJson(resolve(pstackRoot, ".cursor-plugin/plugin.json")),
   codex: readJson(resolve(pstackRoot, ".codex-plugin/plugin.json")),
   claude: readJson(resolve(pstackRoot, ".claude-plugin/plugin.json")),
 };
+const canonicalManifest = manifests.cursor;
 
-const portableKeys = new Set([
-  "$schema",
-  "name",
-  "version",
-  "description",
-  "author",
-  "homepage",
-  "repository",
-  "license",
-  "keywords",
-  "extensions",
-]);
-
-assert(
-  manifests.portable.$schema === "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
-  "plugin.json must declare the Agent Plugins 1.0 schema",
-);
-for (const key of Object.keys(manifests.portable)) {
-  assert(portableKeys.has(key), `plugin.json contains non-portable field: ${key}`);
-}
+assert(!existsSync(resolve(pstackRoot, "plugin.json")), "pstack/plugin.json must not claim Agent Plugins portability");
 
 for (const field of ["name", "version", "description", "homepage", "repository", "license"]) {
   for (const [client, manifest] of Object.entries(manifests)) {
-    assert(manifest[field] === manifests.portable[field], `${client} manifest ${field} differs from plugin.json`);
+    assert(manifest[field] === canonicalManifest[field], `${client} manifest ${field} differs from the Cursor manifest`);
   }
 }
 for (const [client, manifest] of Object.entries(manifests)) {
-  assert(manifest.author?.name === manifests.portable.author?.name, `${client} manifest author differs from plugin.json`);
-  assert(JSON.stringify(manifest.keywords) === JSON.stringify(manifests.portable.keywords), `${client} manifest keywords differ from plugin.json`);
+  assert(manifest.author?.name === canonicalManifest.author?.name, `${client} manifest author differs from the Cursor manifest`);
+  assert(JSON.stringify(manifest.keywords) === JSON.stringify(canonicalManifest.keywords), `${client} manifest keywords differ from the Cursor manifest`);
 }
 
 const licenseText = readText(resolve(pstackRoot, "LICENSE"));
 assert(licenseText.includes("MIT License"), "pstack/LICENSE must preserve the MIT license");
 assert(licenseText.includes("Copyright (c) 2026 Lauren Tan"), "pstack/LICENSE must preserve Lauren Tan's copyright notice");
 
-assert(/^[a-z0-9]+(?:[.-][a-z0-9]+)*$/.test(manifests.portable.name ?? ""), "plugin name is not portable");
-assert(/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(manifests.portable.version ?? ""), "plugin version is not semantic");
+assert(/^[a-z0-9]+(?:[.-][a-z0-9]+)*$/.test(canonicalManifest.name ?? ""), "plugin name is invalid");
+assert(/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(canonicalManifest.version ?? ""), "plugin version is not semantic");
 pluginPath(manifests.cursor.skills, "Cursor skills path");
 pluginPath(manifests.cursor.agents, "Cursor agents path");
 pluginPath(manifests.codex.skills, "Codex skills path");
+assert(!("agents" in manifests.codex), "Codex manifest must not claim native agents support");
 
 for (const nativeDirectory of [".cursor-plugin", ".codex-plugin", ".claude-plugin"]) {
-  assert(!existsSync(resolve(pstackRoot, nativeDirectory, "skills")), `${nativeDirectory} must not contain a copied skills tree`);
+  for (const component of ["skills", "agents"]) {
+    assert(!existsSync(resolve(pstackRoot, nativeDirectory, component)), `${nativeDirectory} must not contain a copied ${component} tree`);
+  }
 }
 
 const cursorMarketplace = readJson(resolve(repositoryRoot, ".cursor-plugin/marketplace.json"));
 const codexMarketplace = readJson(resolve(repositoryRoot, ".agents/plugins/marketplace.json"));
 const claudeMarketplace = readJson(resolve(repositoryRoot, ".claude-plugin/marketplace.json"));
-const cursorEntry = cursorMarketplace.plugins?.find((entry) => entry.name === manifests.portable.name);
-const codexEntry = codexMarketplace.plugins?.find((entry) => entry.name === manifests.portable.name);
-const claudeEntry = claudeMarketplace.plugins?.find((entry) => entry.name === manifests.portable.name);
+const cursorEntry = cursorMarketplace.plugins?.find((entry) => entry.name === canonicalManifest.name);
+const codexEntry = codexMarketplace.plugins?.find((entry) => entry.name === canonicalManifest.name);
+const claudeEntry = claudeMarketplace.plugins?.find((entry) => entry.name === canonicalManifest.name);
 
 assert(cursorEntry, "Cursor marketplace does not contain pstack");
 assert(resolve(repositoryRoot, cursorEntry?.source ?? "") === pstackRoot, "Cursor pstack source must resolve to pstack/");
-assert(cursorEntry?.description === manifests.portable.description, "Cursor marketplace description differs from plugin.json");
+assert(cursorEntry?.description === canonicalManifest.description, "Cursor marketplace description differs from the Cursor manifest");
 
 assert(codexMarketplace.name === "cursor-plugins", "Codex marketplace name must be cursor-plugins");
 assert(codexMarketplace.interface?.displayName === "Cursor Plugins", "Codex marketplace display name must be Cursor Plugins");
@@ -156,11 +140,11 @@ assert(claudeMarketplace.name === "cursor-plugins", "Claude marketplace name mus
 assert(claudeMarketplace.owner?.name, "Claude marketplace owner is required");
 assert(claudeEntry, "Claude marketplace does not contain pstack");
 assert(marketplacePath(claudeEntry?.source, "Claude pstack source") === pstackRoot, "Claude pstack source must resolve to pstack/");
-assert(claudeEntry?.version === manifests.portable.version, "Claude marketplace version differs from plugin.json");
+assert(claudeEntry?.version === canonicalManifest.version, "Claude marketplace version differs from the Cursor manifest");
 for (const field of ["description", "homepage", "license"]) {
-  assert(claudeEntry?.[field] === manifests.portable[field], `Claude marketplace ${field} differs from plugin.json`);
+  assert(claudeEntry?.[field] === canonicalManifest[field], `Claude marketplace ${field} differs from the Cursor manifest`);
 }
-assert(claudeEntry?.author?.name === manifests.portable.author?.name, "Claude marketplace author differs from plugin.json");
+assert(claudeEntry?.author?.name === canonicalManifest.author?.name, "Claude marketplace author differs from the Cursor manifest");
 
 const skillsRoot = resolve(pstackRoot, "skills");
 const skillDirectories = readdirSync(skillsRoot, { withFileTypes: true }).filter((entry) => entry.isDirectory());
@@ -179,46 +163,98 @@ for (const required of [
   "Cursor",
   "Codex",
   "Claude Code",
-  "Agent Plugins 1.0 floor",
+  "Discover MCP tools",
   "~/.cursor/rules/pstack-models.mdc",
   "$CODEX_HOME/pstack/models.md",
   "$CLAUDE_CONFIG_DIR/pstack/models.md",
-  ".pstack/models.md",
   "<model>@<reasoning-effort>",
   "every pstack skill must explicitly read",
+  "shared cross-client model file",
   "pstack serialization, not Codex-native model syntax",
 ]) {
   assert(adapterText.includes(required), `platform adapter is missing ${required}`);
 }
 
-const cursorOnlyPattern = /\bTask\b|AskQuestion|subagent_type|run_in_background|~\/\.cursor|\.cursor\/|agent-transcripts|cursor-team-kit|\/loop|Cursor(?:'s)? built-in|grok-4\.6|claude-(?:fable|opus)-5|gpt-5\.6-sol/;
+const clientPrimitivePatterns = [
+  /\bTask\b|AskQuestion|subagent_type|run_in_background|~\/\.cursor|\.cursor\/|agent-transcripts|cursor-team-kit|\/loop|Cursor(?:'s)? built-in/,
+  /\b(?:cursor-grok|gpt|gemini|glm|composer)-[a-z0-9][a-z0-9.-]*\b/,
+  /\bclaude-(?:fable|opus|sonnet|\d)[a-z0-9.-]*\b|\bkimi-k[a-z0-9.-]*\b/,
+  /\bupdate_state\b|\bSendToUser\b|api2\.cursor\.sh/,
+];
+const cursorOnlySkillPattern = /\bupdate_state\b|\bSendToUser\b|api2\.cursor\.sh/;
 const directModelConfigPath = /~\/\.cursor\/rules\/pstack-models\.mdc|\$CODEX_HOME\/pstack\/models\.md|\$CLAUDE_CONFIG_DIR\/pstack\/models\.md/;
 for (const directory of skillDirectories) {
   const skillPath = resolve(skillsRoot, directory.name, "SKILL.md");
   if (!existsSync(skillPath)) continue;
   const text = readText(skillPath);
-  if (cursorOnlyPattern.test(text)) {
-    assert(text.includes("platform-adapters.md"), `skills/${directory.name}/SKILL.md uses a client primitive without the platform adapter`);
+  const relatedPaths = markdownFiles(resolve(skillsRoot, directory.name));
+  const relatedText = relatedPaths.map(readText).join("\n");
+  const nonAdapterText = relatedPaths.filter((path) => path !== adapterPath).map(readText).join("\n");
+  const metadata = frontmatter(skillPath);
+  const isCursorOnly = metadata.compatibility?.startsWith("Cursor only.");
+  if (clientPrimitivePatterns.some((pattern) => pattern.test(relatedText))) {
+    assert(text.includes("platform-adapters.md") || isCursorOnly, `skills/${directory.name}/SKILL.md uses a client primitive without an adapter or Cursor-only boundary`);
   }
-  assert(!directModelConfigPath.test(text), `skills/${directory.name}/SKILL.md names a client model-config path instead of using the platform adapter`);
+  if (cursorOnlySkillPattern.test(relatedText)) {
+    assert(isCursorOnly, `skills/${directory.name}/SKILL.md uses Cursor-only primitives without compatibility metadata`);
+    const sections = [...text.matchAll(/^##\s+(.+)$/gm)];
+    assert(sections[0]?.[1] === "Check client support", `skills/${directory.name}/SKILL.md must check client support before other steps`);
+    const supportEnd = sections[1]?.index ?? text.length;
+    const supportText = text.slice(sections[0]?.index ?? 0, supportEnd);
+    assert(/\bstop\b/i.test(supportText) && /\bcredential\b/i.test(supportText), `skills/${directory.name}/SKILL.md must stop before credential requests on unsupported clients`);
+  }
+  assert(!directModelConfigPath.test(nonAdapterText), `skills/${directory.name}/SKILL.md names a client model-config path instead of using the platform adapter`);
 }
 
 const setupText = readText(resolve(skillsRoot, "setup-pstack/SKILL.md"));
 assert(setupText.includes("Default to that client's user scope"), "setup-pstack must default to client-specific user scope");
 assert(setupText.includes("Never write another"), "setup-pstack must forbid cross-client configuration writes");
 
+const staleCursorModel = "grok-4.6-fast-xhigh";
+const sharedModelConfigPath = ".pstack/models.md";
+for (const markdownPath of markdownFiles(pstackRoot)) {
+  const text = readText(markdownPath);
+  assert(!text.includes(staleCursorModel), `${relative(repositoryRoot, markdownPath)} uses the stale Cursor model ${staleCursorModel}`);
+  assert(!text.includes(sharedModelConfigPath), `${relative(repositoryRoot, markdownPath)} uses the shared cross-client model path ${sharedModelConfigPath}`);
+}
+const checkPlanPath = resolve(skillsRoot, "poteto-mode/scripts/check-plan.mjs");
+assert(!readText(checkPlanPath).includes(staleCursorModel), `${relative(repositoryRoot, checkPlanPath)} uses the stale Cursor model ${staleCursorModel}`);
+
+const whyText = readText(resolve(skillsRoot, "why/SKILL.md"));
+assert(whyText.includes("active host's exposed MCP and tool inventory"), "why must discover MCP tools from the active host");
+
+const workflowText = readText(resolve(repositoryRoot, ".github/workflows/validate-plugins.yml"));
+for (const required of [
+  '".agents/plugins/marketplace.json"',
+  '".claude-plugin/marketplace.json"',
+  '".github/workflows/validate-plugins.yml"',
+  '"pstack/**"',
+  "node-version: 20",
+  "node scripts/validate-plugins.mjs",
+  "node pstack/scripts/validate-cross-client.mjs",
+]) {
+  assert(workflowText.includes(required), `validate-plugins workflow is missing ${required}`);
+}
+
 for (const name of ["comment-sicko", "poteto-agent"]) {
-  assert(existsSync(resolve(pstackRoot, `agents/${name}.md`)), `agents/${name}.md is missing`);
+  const agentPath = resolve(pstackRoot, `agents/${name}.md`);
+  assert(existsSync(agentPath), `agents/${name}.md is missing`);
+  if (existsSync(agentPath)) {
+    const metadata = frontmatter(agentPath);
+    assert(metadata.name === name, `agents/${name}.md name must match its filename`);
+    assert(!("is_background" in metadata) && !("background" in metadata), `agents/${name}.md must leave background scheduling to the active client`);
+  }
   assert(adapterText.includes(`${name}.md`), `platform adapter must name agents/${name}.md as a source of truth`);
 }
 
-for (const [client, manifest] of Object.entries({ portable: manifests.portable, codex: manifests.codex, claude: manifests.claude })) {
+for (const [client, manifest] of Object.entries({ codex: manifests.codex, claude: manifests.claude })) {
   assert(!JSON.stringify(manifest).toLowerCase().includes("benny"), `${client} manifest must not register Benny`);
 }
 
 let checkedLinks = 0;
 for (const markdownPath of markdownFiles(pstackRoot)) {
   const text = readText(markdownPath);
+  assert(!/subagent_type:\s*["'`]Comment Sicko["'`]/.test(text), `${relative(repositoryRoot, markdownPath)} uses the stale Comment Sicko identifier`);
   const links = text.matchAll(/!?\[[^\]]*\]\(([^)]+)\)/g);
   for (const match of links) {
     let target = match[1].trim().replace(/^<|>$/g, "");
@@ -234,5 +270,5 @@ if (failures.length > 0) {
   for (const failure of failures) process.stderr.write(`FAIL ${failure}\n`);
   process.exitCode = 1;
 } else {
-  process.stdout.write(`Validated 4 manifests, 3 marketplaces, ${skillDirectories.length} skills, and ${checkedLinks} local Markdown links.\n`);
+  process.stdout.write(`Validated 3 manifests, 3 marketplaces, ${skillDirectories.length} skills, and ${checkedLinks} local Markdown links.\n`);
 }
