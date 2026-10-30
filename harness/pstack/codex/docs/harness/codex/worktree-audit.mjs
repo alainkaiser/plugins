@@ -28,7 +28,7 @@ function mentionsWorktree(value, paths) {
       for (let index = value.indexOf(path); index !== -1; index = value.indexOf(path, index + 1)) {
         const end = index + path.length;
         const next = value[end];
-        if (next === undefined || /[\s/"'`;|&<>)]/.test(next) || value.startsWith('\\"', end)) return true;
+        if (next === undefined || /[\s/"'`;|&<>)\\]/.test(next)) return true;
       }
     }
     return false;

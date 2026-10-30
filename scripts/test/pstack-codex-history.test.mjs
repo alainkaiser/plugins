@@ -298,6 +298,21 @@ test("custom tool JavaScript inputs protect literal and escaped paths without ma
   assert.equal(result[2], row(sibling));
 });
 
+test("escaped newlines and tabs after a worktree path count as mentions without matching sibling prefixes", async (t) => {
+  const f = fixture(t);
+  const now = Date.parse("2026-10-30T12:00:00Z");
+  const body = JSON.stringify({ type: "response_item", payload: {
+    type: "function_call", name: "exec_command",
+    arguments: JSON.stringify({ cmd: "cd /work/newline\nnpm test\ncd /work/tab\tls\ncd /work/sibling-other\nls" }),
+  } }) + "\n";
+  f.rollout("sessions/parent.jsonl", "parent", f.workspace, now, { body });
+  const output = [row("/work/newline"), row("/work/tab"), row("/work/sibling")].join("\n");
+  const result = (await includeCodexActivity(output, await readSessions(f.root), now, f.workspace)).split("\n");
+  assert.equal(result[0], row("/work/newline", "verify-recent-chat", "2026-10-30"));
+  assert.equal(result[1], row("/work/tab", "verify-recent-chat", "2026-10-30"));
+  assert.equal(result[2], row("/work/sibling"));
+});
+
 test("audit canonicalizes existing cwd aliases and repository scope without changing output or history selection", async (t) => {
   const f = fixture(t);
   const now = Date.parse("2026-10-30T12:00:00Z");
