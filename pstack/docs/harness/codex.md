@@ -88,6 +88,8 @@ node <pstack>/docs/harness/codex/sessions.mjs --cwd <absolute-workspace-path>
 
 The helper reads metadata from `.jsonl` and compressed `.jsonl.zst` files under `sessions/` and `archived_sessions/`. Both directories are under `$CODEX_HOME`, which defaults to `~/.codex`. It lists matching top-level chats newest first. `--cwd` requires an exact workspace match. It does not include chats started in subdirectories or other workspaces.
 
+The helper reads the metadata line of every rollout under both directories, including rollouts from other workspaces. One empty or malformed rollout fails the whole listing. The error names the file. With the user's approval, move or repair that file. Otherwise pass `--home <codex-home>` to read a copy of the history that excludes it. Then run the command again. The helper does not skip the file. A skipped rollout can hide history.
+
 Use `--include-subagents` when the task needs delegate history. The result labels those sessions with `isSubagent` and `parentId`. Use `--id <session-id>` to select a known chat, including a subagent. To read the selected rollout as plain JSONL, run:
 
 ```sh
