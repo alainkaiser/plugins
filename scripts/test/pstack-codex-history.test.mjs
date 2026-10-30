@@ -4,14 +4,16 @@ import { randomBytes } from "node:crypto";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { test } from "node:test";
 import { zstdCompressSync } from "node:zlib";
 import { readSessions } from "../../pstack/docs/harness/codex/sessions.mjs";
 import { includeCodexActivity } from "../../pstack/docs/harness/codex/worktree-audit.mjs";
 
-const cli = fileURLToPath(new URL("../../pstack/docs/harness/codex/sessions.mjs", import.meta.url));
-const auditCli = fileURLToPath(new URL("../../pstack/docs/harness/codex/worktree-audit.mjs", import.meta.url));
+const pstack = fileURLToPath(new URL("../../pstack", import.meta.url));
+const cli = join(pstack, "docs/harness/codex/sessions.mjs");
+const auditCli = join(pstack, "docs/harness/codex/worktree-audit.mjs");
+const helpFooter = /\S[\s\S]*\nCodex history: --home <codex-home> overrides CODEX_HOME\.\n$/;
 
 function fixture(t) {
   const root = realpathSync(mkdtempSync(join(tmpdir(), "pstack-codex-history-")));
@@ -54,6 +56,33 @@ test("missing history is empty but malformed metadata fails the lookup", async (
   assert.match(result.stderr, /Invalid Codex session metadata/);
   assert.equal(result.stdout, "");
   assert.equal(f.run("--cwd", "relative/path").status, 1);
+});
+
+test("both CLIs run when invoked through a symlinked install path", (t) => {
+  const f = fixture(t);
+  const link = join(f.root, "pstack-link");
+  symlinkSync(pstack, link);
+  const via = (script, ...args) =>
+    spawnSync(process.execPath, [join(link, "docs/harness/codex", script), ...args], { encoding: "utf8" });
+  const rejected = via("sessions.mjs", "--cwd", "relative");
+  assert.equal(rejected.status, 1);
+  assert.match(rejected.stderr, /--cwd requires an absolute workspace path/);
+  f.rollout("sessions/linked.jsonl", "linked", f.workspace, 1000);
+  const listed = via("sessions.mjs", "--home", f.root, "--cwd", f.workspace);
+  assert.equal(listed.status, 0, listed.stderr);
+  assert.deepEqual(JSON.parse(listed.stdout).map(({ id }) => id), ["linked"]);
+  const help = via("worktree-audit.mjs", "--help");
+  assert.equal(help.status, 0, help.stderr);
+  assert.match(help.stdout, helpFooter);
+});
+
+test("both helpers import as libraries when the process argument is not a file", () => {
+  const source = `const { readSessions } = await import(${JSON.stringify(pathToFileURL(cli).href)});
+const { includeCodexActivity } = await import(${JSON.stringify(pathToFileURL(auditCli).href)});
+console.log(typeof readSessions, typeof includeCodexActivity);`;
+  const result = spawnSync(process.execPath, ["--input-type=module", "-e", source, "missing-argument"], { encoding: "utf8" });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.stdout, "function function\n");
 });
 
 test("compressed active and archived rollouts are listed and read only after exact workspace selection", (t) => {

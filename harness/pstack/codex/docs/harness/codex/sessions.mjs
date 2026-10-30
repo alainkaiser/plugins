@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { createReadStream } from "node:fs";
+import { createReadStream, existsSync, realpathSync } from "node:fs";
 import { once } from "node:events";
 import { readdir, stat } from "node:fs/promises";
 import { homedir } from "node:os";
@@ -94,7 +94,7 @@ export async function readSessions(home = process.env.CODEX_HOME || join(homedir
   return sessions.sort((a, b) => b.modifiedAt - a.modifiedAt || a.path.localeCompare(b.path));
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && existsSync(process.argv[1]) && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const { values } = parseArgs({ options: {
       cwd: { type: "string" }, id: { type: "string" }, home: { type: "string" },

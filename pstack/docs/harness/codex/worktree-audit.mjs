@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { execFileSync } from "node:child_process";
+import { existsSync, realpathSync } from "node:fs";
 import { realpath } from "node:fs/promises";
 import { join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -95,7 +96,7 @@ export async function includeCodexActivity(output, sessions, now = Date.now(), r
   return lines.join("\n");
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && existsSync(process.argv[1]) && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const { values, positionals } = parseArgs({ allowPositionals: true, options: {
       home: { type: "string" }, base: { type: "string", short: "b" },
