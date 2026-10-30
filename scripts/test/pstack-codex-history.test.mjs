@@ -85,6 +85,18 @@ console.log(typeof readSessions, typeof includeCodexActivity);`;
   assert.equal(result.stdout, "function function\n");
 });
 
+test("history defaults to CODEX_HOME when --home is absent", (t) => {
+  const f = fixture(t);
+  f.rollout("sessions/home.jsonl", "home", f.workspace, 1000);
+  const run = (env, ...args) =>
+    spawnSync(process.execPath, [cli, "--cwd", f.workspace, ...args], { encoding: "utf8", env: { ...process.env, ...env } });
+  const defaulted = run({ CODEX_HOME: f.root });
+  assert.equal(defaulted.status, 0, defaulted.stderr);
+  assert.deepEqual(JSON.parse(defaulted.stdout).map(({ id }) => id), ["home"]);
+  assert.deepEqual(JSON.parse(run({ CODEX_HOME: join(f.root, "elsewhere") }).stdout), []);
+  assert.deepEqual(JSON.parse(run({ CODEX_HOME: join(f.root, "elsewhere") }, "--home", f.root).stdout).map(({ id }) => id), ["home"]);
+});
+
 test("compressed active and archived rollouts are listed and read only after exact workspace selection", (t) => {
   const f = fixture(t);
   const body = JSON.stringify({ type: "event_msg", payload: { message: "selected transcript" } }) + "\n";
@@ -407,7 +419,9 @@ test("worktree audit CLI uses injected history and protects delegated work in a 
   const fields = result.stdout.trim().split("\n").at(-1).split("\t");
   assert.equal(fields[7], "verify-recent-chat");
   assert.equal(fields[8], worktree);
-  assert.equal(run("--help").status, 0);
+  const help = run("--help");
+  assert.equal(help.status, 0, help.stderr);
+  assert.match(help.stdout, helpFooter);
   const bad = f.rollout("sessions/broken.jsonl.zst", "broken", repository, Date.now());
   writeFileSync(bad, "bad compressed data");
   const failed = run("-b", "main", repository);

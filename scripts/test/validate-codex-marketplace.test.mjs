@@ -43,9 +43,11 @@ test("validates Codex entries and rejects compatibility manifest version drift",
   assert.match(drifted.stderr, /manifest versions differ/);
 });
 
-test("rejects Codex source escapes, mismatched names and invalid policies", (t) => {
+test("rejects Codex source escapes, missing portable manifests, mismatched names and invalid policies", (t) => {
   const f = fixture(t);
+  f.write("codex-only/.codex-plugin/plugin.json", { name: "pstack", version: "1.0.0" });
   for (const [entry, error] of [
+    [{ ...f.entry, source: { source: "local", path: "./codex-only" } }, /missing portable plugin.json/],
     [{ ...f.entry, source: { source: "local", path: "./../outside" } }, /source leaves the repository/],
     [{ ...f.entry, source: { source: "local", path: 3 } }, /source must be a/],
     [{ ...f.entry, name: "different" }, /name differs from plugin.json/],

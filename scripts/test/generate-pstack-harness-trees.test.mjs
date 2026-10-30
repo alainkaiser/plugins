@@ -58,6 +58,18 @@ test("generates both installable trees without changing source skills", (t) => {
   assert.equal(f.read("harness/pstack/codex/docs/harness/codex/sessions.mjs"), f.read("pstack/docs/harness/codex/sessions.mjs"));
 });
 
+test("the Codex compatibility manifest drops $schema while the copied manifests keep it", (t) => {
+  const f = fixture(t);
+  const $schema = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json";
+  f.write("pstack/plugin.json", JSON.stringify({ $schema, name: "pstack", version: "1.0.0" }));
+  succeeds(f.run());
+  assert.deepEqual(JSON.parse(f.read("harness/pstack/codex/.codex-plugin/plugin.json")),
+    { name: "pstack", version: "1.0.0", skills: "./skills/" });
+  for (const path of ["codex/plugin.json", "claude-code/plugin.json", "claude-code/.claude-plugin/plugin.json"]) {
+    assert.equal(JSON.parse(f.read(`harness/pstack/${path}`)).$schema, $schema);
+  }
+});
+
 test("regeneration carries new skills, invocation changes and versions to both hosts", (t) => {
   const f = fixture(t);
   succeeds(f.run());
