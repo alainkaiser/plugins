@@ -75,7 +75,7 @@ async function sessionMetadata(path) {
       throw new Error(`Invalid Codex session metadata: ${path}`);
     }
     const subagent = payload.source?.subagent;
-    const parentId = subagent?.thread_spawn?.parent_thread_id;
+    const parentId = payload.parent_thread_id ?? subagent?.thread_spawn?.parent_thread_id;
     const { mtimeMs } = await stat(path);
     return {
       id: payload.id, cwd: resolve(payload.cwd), path, modifiedAt: mtimeMs,

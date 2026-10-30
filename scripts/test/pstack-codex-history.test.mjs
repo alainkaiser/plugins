@@ -17,10 +17,10 @@ function fixture(t) {
   const root = realpathSync(mkdtempSync(join(tmpdir(), "pstack-codex-history-")));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const workspace = join(root, "workspace with spaces");
-  const rollout = (relative, id, cwd, modifiedAt, { body = "not JSON; message bodies must not be parsed\n", source = "cli" } = {}) => {
+  const rollout = (relative, id, cwd, modifiedAt, { body = "not JSON; message bodies must not be parsed\n", source = "cli", meta = {} } = {}) => {
     const path = join(root, relative);
     mkdirSync(dirname(path), { recursive: true });
-    const content = JSON.stringify({ type: "session_meta", payload: { id, cwd, source } }) + "\n" + body;
+    const content = JSON.stringify({ type: "session_meta", payload: { id, cwd, source, ...meta } }) + "\n" + body;
     writeFileSync(path, path.endsWith(".zst") ? zstdCompressSync(content) : content);
     utimesSync(path, modifiedAt / 1000, modifiedAt / 1000);
     return path;
@@ -95,9 +95,13 @@ test("history lists omit subagents by default while explicit inclusion and id se
   const f = fixture(t);
   f.rollout("sessions/parent.jsonl", "parent", f.workspace, 1000);
   f.rollout("sessions/child.jsonl.zst", "child", f.workspace, 2000, { source: spawnedBy("parent"), body: "child transcript\n" });
+  f.rollout("sessions/guardian.jsonl", "guardian", f.workspace, 3000, {
+    source: { subagent: { other: "guardian" } }, meta: { parent_thread_id: "parent" },
+  });
   assert.deepEqual(JSON.parse(f.run("--cwd", f.workspace).stdout).map(({ id }) => id), ["parent"]);
   const all = JSON.parse(f.run("--cwd", f.workspace, "--include-subagents").stdout);
   assert.deepEqual(all.map(({ id, isSubagent, parentId }) => ({ id, isSubagent, parentId })), [
+    { id: "guardian", isSubagent: true, parentId: "parent" },
     { id: "child", isSubagent: true, parentId: "parent" },
     { id: "parent", isSubagent: false, parentId: null },
   ]);
