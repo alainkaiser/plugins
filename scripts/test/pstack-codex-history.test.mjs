@@ -10,6 +10,9 @@ import { zstdCompressSync } from "node:zlib";
 import { readSessions } from "../../pstack/docs/harness/codex/sessions.mjs";
 import { includeCodexActivity } from "../../pstack/docs/harness/codex/worktree-audit.mjs";
 
+// Expected last-chat dates are UTC days. The local-time test sets its own TZ.
+process.env.TZ = "UTC";
+
 const pstack = fileURLToPath(new URL("../../pstack", import.meta.url));
 const cli = join(pstack, "docs/harness/codex/sessions.mjs");
 const auditCli = join(pstack, "docs/harness/codex/worktree-audit.mjs");
